@@ -1,5 +1,6 @@
 (function () {
-  let history = []; // [{role, content}]
+  let history = [];
+  let isWaiting = false;
 
   window.addEventListener("basevulture:unlocked", initChat);
 
@@ -22,12 +23,14 @@
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (isWaiting) return;
+
       const text = input.value.trim();
       if (!text) return;
 
       const blockedHit = window.BV.checkBlockedWords(text);
       if (blockedHit.length) {
-        addMessage("system-note", `Message blocked — contains: ${blockedHit.join(", ")}`);
+        addMessage("system-note", `⚠️ Message blocked — contains: ${blockedHit.join(", ")}`);
         return;
       }
 
@@ -38,11 +41,12 @@
 
       const url = window.BV.getNgrokUrl();
       if (!url) {
-        addMessage("system-note", "No ngrok URL saved — set one in the Connection tab first.");
+        addMessage("system-note", "❌ No ngrok URL saved — configure in Connection tab first.");
         return;
       }
 
-      const thinking = addMessage("assistant", "…");
+      isWaiting = true;
+      const thinking = addMessage("assistant", "⏳ Thinking…");
 
       try {
         const citations = window.BV.matchCitations(text);
@@ -50,7 +54,7 @@
 
         const messages = [];
         if (systemPrompt) messages.push({ role: "system", content: systemPrompt });
-        messages.push(...history);
+        messages.push(...history.slice(0, -1));
 
         const res = await fetch(url + "/v1/chat/completions", {
           method: "POST",
@@ -60,16 +64,17 @@
           },
           body: JSON.stringify({
             model: "local-model",
-            messages,
+            messages: [...messages, { role: "user", content: text }],
             temperature: 0.7,
-            stream: false
+            stream: false,
+            max_tokens: 1024
           })
         });
 
         if (!res.ok) {
-          const errBody = await res.text();
-          thinking.textContent = `Error ${res.status} — ${errBody}`;
+          thinking.textContent = `❌ Error ${res.status}`;
           window.BV.updateStatusDot(false);
+          isWaiting = false;
           return;
         }
 
@@ -78,19 +83,30 @@
 
         const outHit = window.BV.checkBlockedWords(reply);
         if (outHit.length) {
-          reply = "[response withheld — contained a blocked word]";
+          reply = "⛔ [Response withheld — contained blocked words]";
         }
 
         thinking.textContent = reply;
         history.push({ role: "assistant", content: reply });
         window.BV.updateStatusDot(true);
       } catch (err) {
-        thinking.textContent = "Couldn't reach the server. Is ngrok running, and is the URL current?";
+        thinking.textContent = "❌ Server unreachable. Check ngrok is running and URL is correct.";
         window.BV.updateStatusDot(false);
       }
 
+      isWaiting = false;
       log.scrollTop = log.scrollHeight;
     });
+
+    const savedHistory = localStorage.getItem("bv_chat_history");
+    if (savedHistory) {
+      try {
+        history = JSON.parse(savedHistory);
+        history.forEach((msg) => addMessage(msg.role, msg.content));
+      } catch (e) {
+        console.error("Failed to load chat history:", e);
+      }
+    }
   }
 
   function addMessage(role, text) {
@@ -100,6 +116,15 @@
     el.textContent = text;
     log.appendChild(el);
     log.scrollTop = log.scrollHeight;
+    localStorage.setItem("bv_chat_history", JSON.stringify(history));
     return el;
   }
+
+  window.BV = window.BV || {};
+  window.BV.clearChat = function () {
+    history = [];
+    const log = document.getElementById("chat-log");
+    log.innerHTML = "";
+    localStorage.removeItem("bv_chat_history");
+  };
 })();

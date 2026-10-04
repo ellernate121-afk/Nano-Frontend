@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BaseVulture</title>
-<link rel="stylesheet" href="assets/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BaseVulture</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ===================== GATE ===================== -->
   <div id="gate" class="gate">
     <div class="gate-card">
       <div class="gate-mark">⟡</div>
@@ -20,9 +19,7 @@
     </div>
   </div>
 
-  <!-- ===================== APP ===================== -->
   <div id="app" class="app hidden">
-
     <aside class="rail">
       <div class="rail-brand">
         <span class="rail-mark">⟡</span>
@@ -30,13 +27,12 @@
       </div>
 
       <nav class="rail-nav">
-        <button class="rail-btn active" data-tab="chat">Chat</button>
-        <button class="rail-btn" data-tab="prompt">System Prompt</button>
-        <button class="rail-btn" data-tab="citations">Citations</button>
-        <button class="rail-btn" data-tab="censorship">Censorship</button>
-        <button class="rail-btn" data-tab="blocked">Blocked Words</button>
-        <button class="rail-btn" data-tab="body">Body Control</button>
-        <button class="rail-btn" data-tab="connection">Connection</button>
+        <button class="rail-btn active" data-tab="chat">💬 Chat</button>
+        <button class="rail-btn" data-tab="prompt">⚙️ System Prompt</button>
+        <button class="rail-btn" data-tab="citations">📚 Citations</button>
+        <button class="rail-btn" data-tab="censorship">🛡️ Censorship</button>
+        <button class="rail-btn" data-tab="blocked">🚫 Blocked Words</button>
+        <button class="rail-btn" data-tab="connection">🔗 Connection</button>
       </nav>
 
       <div class="rail-status">
@@ -46,12 +42,10 @@
     </aside>
 
     <main class="panel">
-
-      <!-- ---- Chat ---- -->
       <section id="tab-chat" class="tab active">
         <header class="tab-head">
           <h2>Chat</h2>
-          <p>Talking to the model running locally in LM Studio.</p>
+          <p>Talk to your locally running LM Studio model. All context stays on your machine.</p>
         </header>
         <div id="chat-log" class="chat-log"></div>
         <form id="chat-form" class="chat-form">
@@ -60,114 +54,102 @@
         </form>
       </section>
 
-      <!-- ---- System Prompt ---- -->
       <section id="tab-prompt" class="tab">
         <header class="tab-head">
           <h2>System Prompt</h2>
-          <p>This is prepended to every request, under the censorship-level rules. If the model starts arguing with its own instructions, tighten this.</p>
+          <p>Define how your model should behave. This is prepended to every conversation.</p>
         </header>
-        <textarea id="prompt-text" class="big-text" placeholder="You are…" rows="14"></textarea>
+        <textarea id="prompt-text" class="big-text" placeholder="You are a helpful AI assistant…" rows="10"></textarea>
         <div class="row-actions">
-          <button id="prompt-save" class="btn-primary">Save</button>
+          <button id="prompt-save" class="btn-primary">Save Prompt</button>
           <span id="prompt-saved" class="save-note"></span>
         </div>
       </section>
 
-      <!-- ---- Citations ---- -->
       <section id="tab-citations" class="tab">
         <header class="tab-head">
-          <h2>Citations</h2>
-          <p>Add sourced facts the model can draw on. Each entry is injected into context — by label match — instead of being baked into weights, so nothing gets trained or copied wholesale.</p>
+          <h2>Citations & Knowledge Base</h2>
+          <p>Add facts or context the model can draw from. These are injected dynamically based on keywords in your message.</p>
         </header>
 
         <form id="citation-form" class="citation-form">
-          <input id="cit-label" class="field" placeholder="Label / topic (e.g. 'meccanoid servo pinout')" required>
-          <input id="cit-source" class="field" placeholder="Source (e.g. 'Meccano official manual, 2016')" required>
-          <textarea id="cit-text" class="field" placeholder="Short note in your own words — what the model should know" rows="3" required></textarea>
-          <button type="submit" class="btn-primary">Add citation</button>
+          <input id="cit-label" class="field" placeholder="Topic or keyword (e.g., 'servo pinout')" required>
+          <input id="cit-source" class="field" placeholder="Source (e.g., 'Official manual 2024')" required>
+          <textarea id="cit-text" class="field" placeholder="What the model should know about this…" rows="3" required></textarea>
+          <button type="submit" class="btn-primary">Add Citation</button>
         </form>
 
         <ul id="citation-list" class="citation-list"></ul>
       </section>
 
-      <!-- ---- Censorship ---- -->
       <section id="tab-censorship" class="tab">
         <header class="tab-head">
-          <h2>Censorship Level</h2>
-          <p>Swaps which rule block gets appended to your system prompt. This model runs on your own hardware — set it however you want.</p>
+          <h2>Safety Level</h2>
+          <p>Choose how conservative the model should be. This model runs on your hardware—adjust to your preference.</p>
         </header>
 
         <div id="censor-options" class="censor-grid">
           <label class="censor-card">
             <input type="radio" name="censor" value="none">
             <span class="censor-name">None</span>
-            <span class="censor-desc">No extra restrictions beyond your system prompt.</span>
+            <span class="censor-desc">No extra restrictions. Follow your system prompt only.</span>
           </label>
           <label class="censor-card">
             <input type="radio" name="censor" value="some">
-            <span class="censor-name">Some</span>
-            <span class="censor-desc">Light guardrails — avoids the obviously reckless stuff.</span>
+            <span class="censor-name">Moderate</span>
+            <span class="censor-desc">Light guardrails. Avoid obviously harmful requests.</span>
           </label>
           <label class="censor-card">
             <input type="radio" name="censor" value="strict">
             <span class="censor-name">Strict</span>
-            <span class="censor-desc">Conservative by default, declines anything borderline.</span>
+            <span class="censor-desc">Conservative. Decline borderline requests.</span>
           </label>
           <label class="censor-card">
             <input type="radio" name="censor" value="lockdown">
             <span class="censor-name">Lockdown</span>
-            <span class="censor-desc">Declines almost everything. Mostly for testing refusal behavior.</span>
+            <span class="censor-desc">Testing mode. Decline almost everything.</span>
           </label>
         </div>
       </section>
 
-      <!-- ---- Blocked Words ---- -->
       <section id="tab-blocked" class="tab">
         <header class="tab-head">
           <h2>Blocked Words</h2>
-          <p>Checked against outgoing messages and incoming replies before anything renders.</p>
+          <p>Prevent certain words/phrases from being sent or received. Checked on every message.</p>
         </header>
 
         <form id="blocked-form" class="citation-form">
-          <input id="blocked-input" class="field" placeholder="word or phrase">
-          <button type="submit" class="btn-primary">Add</button>
+          <div class="blocked-input-row">
+            <input id="blocked-input" class="field" placeholder="word or phrase">
+            <button type="submit" class="btn-primary">Add</button>
+          </div>
         </form>
 
         <ul id="blocked-list" class="chip-list"></ul>
       </section>
 
-      <!-- ---- Body Control ---- -->
-      <section id="tab-body" class="tab">
-        <header class="tab-head">
-          <h2>Body Control</h2>
-          <p>Wired up once the ESP32 / Bluetooth / servo bridge is running. Placeholder for now.</p>
-        </header>
-        <div class="stub-box">
-          Not connected yet — this tab will talk to your local Python bridge the same way Chat talks to LM Studio.
-        </div>
-      </section>
-
-      <!-- ---- Connection ---- -->
       <section id="tab-connection" class="tab">
         <header class="tab-head">
-          <h2>Connection</h2>
-          <p>Paste today's ngrok URL for your LM Studio server. It rotates every time ngrok restarts, so you'll do this once per session.</p>
+          <h2>Server Connection</h2>
+          <p>Connect to your LM Studio instance via ngrok. The URL rotates every ngrok restart.</p>
         </header>
 
-        <div class="conn-row">
-          <input id="ngrok-url" class="field" placeholder="https://xxxxxxx.ngrok-free.app">
-          <button id="ngrok-save" class="btn-primary">Save</button>
+        <div class="conn-section">
+          <label class="field-label">ngrok URL</label>
+          <div class="conn-row">
+            <input id="ngrok-url" class="field" placeholder="https://xxxxxxx.ngrok-free.app">
+            <button id="ngrok-save" class="btn-primary">Save</button>
+          </div>
+          <button id="ngrok-test" class="btn-ghost">Test Connection</button>
+          <p id="ngrok-msg" class="save-note"></p>
         </div>
-        <button id="ngrok-test" class="btn-ghost">Test connection</button>
-        <p id="ngrok-msg" class="save-note"></p>
       </section>
-
     </main>
   </div>
 
-  <script src="assets/auth.js"></script>
-  <script src="assets/settings.js"></script>
-  <script src="assets/chat.js"></script>
-  <script src="assets/app.js"></script>
+  <script src="auth.js"></script>
+  <script src="settings.js"></script>
+  <script src="chat.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
