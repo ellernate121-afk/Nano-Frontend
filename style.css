@@ -1,0 +1,313 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
+
+:root{
+  --bg:        #0A0E14;
+  --surface:   #11161F;
+  --surface-2: #161C27;
+  --line:      #222A38;
+  --text:      #E7E9EC;
+  --muted:     #7C8699;
+  --amber:     #D9A441;
+  --teal:      #2BB7A7;
+  --danger:    #E25C5C;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
+.hidden{display:none !important}
+
+/* ===================== GATE ===================== */
+.gate{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(60% 50% at 50% 0%, rgba(217,164,65,0.08), transparent),
+    var(--bg);
+  padding:24px;
+}
+.gate-card{
+  width:100%;
+  max-width:340px;
+  text-align:center;
+}
+.gate-mark{
+  font-size:28px;
+  color:var(--amber);
+  margin-bottom:8px;
+}
+.gate-title{
+  font-family:var(--mono);
+  font-weight:700;
+  font-size:22px;
+  letter-spacing:0.02em;
+  margin:0 0 4px;
+}
+.gate-sub{
+  color:var(--muted);
+  font-size:14px;
+  margin:0 0 24px;
+  min-height:20px;
+}
+.gate-input{
+  width:100%;
+  background:var(--surface);
+  border:1px solid var(--line);
+  color:var(--text);
+  font-family:var(--mono);
+  font-size:20px;
+  letter-spacing:0.3em;
+  text-align:center;
+  border-radius:8px;
+  padding:14px;
+  outline:none;
+  transition:border-color .15s;
+}
+.gate-input:focus{border-color:var(--amber)}
+.gate-btn{
+  width:100%;
+  margin-top:14px;
+  background:var(--amber);
+  color:#1a1206;
+  border:none;
+  border-radius:8px;
+  padding:12px;
+  font-family:var(--sans);
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+  transition:filter .15s;
+}
+.gate-btn:hover{filter:brightness(1.08)}
+.gate-msg{
+  min-height:18px;
+  margin-top:12px;
+  font-size:13px;
+  color:var(--danger);
+}
+.gate-shake{animation:shake .32s}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  75%{transform:translateX(6px)}
+}
+
+/* ===================== APP SHELL ===================== */
+.app{
+  display:flex;
+  min-height:100vh;
+}
+.rail{
+  width:220px;
+  flex-shrink:0;
+  background:var(--surface);
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  padding:20px 14px;
+}
+.rail-brand{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0 8px 20px;
+}
+.rail-mark{color:var(--amber);font-size:18px}
+.rail-name{font-family:var(--mono);font-weight:700;font-size:14px}
+
+.rail-nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.rail-btn{
+  text-align:left;
+  background:none;
+  border:none;
+  color:var(--muted);
+  font-family:var(--sans);
+  font-size:14px;
+  padding:10px 12px;
+  border-radius:7px;
+  cursor:pointer;
+  transition:background .12s, color .12s;
+}
+.rail-btn:hover{background:var(--surface-2); color:var(--text)}
+.rail-btn.active{background:var(--surface-2); color:var(--amber); font-weight:600}
+
+.rail-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 8px 0;
+  border-top:1px solid var(--line);
+  margin-top:14px;
+  font-size:12px;
+  color:var(--muted);
+}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.status-dot.offline{background:var(--danger)}
+.status-dot.online{background:var(--teal)}
+
+.panel{flex:1; padding:32px 40px; max-width:880px}
+.tab{display:none}
+.tab.active{display:block}
+.tab-head{margin-bottom:22px}
+.tab-head h2{font-family:var(--mono); font-size:19px; margin:0 0 6px}
+.tab-head p{color:var(--muted); font-size:14px; margin:0; max-width:64ch; line-height:1.5}
+
+/* ===================== FORMS / FIELDS ===================== */
+.field, .big-text{
+  width:100%;
+  background:var(--surface);
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:7px;
+  padding:11px 12px;
+  font-family:var(--sans);
+  font-size:14px;
+  outline:none;
+  margin-bottom:10px;
+  transition:border-color .12s;
+}
+.big-text{font-family:var(--mono); font-size:13px; line-height:1.55; resize:vertical}
+.field:focus, .big-text:focus{border-color:var(--amber)}
+
+.btn-primary{
+  background:var(--amber);
+  color:#1a1206;
+  border:none;
+  border-radius:7px;
+  padding:10px 18px;
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-ghost{
+  background:none;
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:7px;
+  padding:9px 16px;
+  font-size:14px;
+  cursor:pointer;
+  margin-top:4px;
+}
+.btn-ghost:hover{border-color:var(--teal); color:var(--teal)}
+
+.row-actions{display:flex; align-items:center; gap:12px; margin-top:4px}
+.save-note{color:var(--teal); font-size:13px}
+
+/* ===================== CHAT ===================== */
+.chat-log{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:10px;
+  height:50vh;
+  min-height:320px;
+  overflow-y:auto;
+  padding:16px;
+  margin-bottom:12px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.msg{max-width:78%; padding:10px 13px; border-radius:10px; font-size:14px; line-height:1.5; white-space:pre-wrap}
+.msg.user{align-self:flex-end; background:var(--amber); color:#1a1206}
+.msg.assistant{align-self:flex-start; background:var(--surface-2); border:1px solid var(--line)}
+.msg.system-note{align-self:center; color:var(--muted); font-size:12px; font-family:var(--mono)}
+
+.chat-form{display:flex; gap:10px; align-items:flex-end}
+.chat-input{
+  flex:1;
+  resize:none;
+  background:var(--surface);
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:9px;
+  padding:12px;
+  font-family:var(--sans);
+  font-size:14px;
+  outline:none;
+  max-height:160px;
+}
+.chat-input:focus{border-color:var(--amber)}
+.chat-send{
+  background:var(--teal);
+  color:#07211d;
+  border:none;
+  border-radius:9px;
+  padding:12px 20px;
+  font-weight:600;
+  cursor:pointer;
+}
+.chat-send:hover{filter:brightness(1.08)}
+
+/* ===================== CITATIONS / BLOCKED ===================== */
+.citation-form{margin-bottom:18px}
+.citation-list, .chip-list{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px}
+.citation-item{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:12px 14px;
+}
+.citation-item .cit-label{font-weight:600; font-size:14px}
+.citation-item .cit-source{color:var(--amber); font-size:12px; font-family:var(--mono); margin:2px 0 6px}
+.citation-item .cit-text{color:var(--muted); font-size:13px; line-height:1.5}
+.citation-item .cit-remove{
+  float:right; background:none; border:none; color:var(--danger);
+  cursor:pointer; font-size:12px;
+}
+
+.chip-list{flex-direction:row; flex-wrap:wrap}
+.chip{
+  display:flex; align-items:center; gap:8px;
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:999px; padding:6px 12px; font-size:13px; font-family:var(--mono);
+}
+.chip button{background:none; border:none; color:var(--danger); cursor:pointer; font-size:13px}
+
+/* ===================== CENSORSHIP ===================== */
+.censor-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.censor-card{
+  position:relative;
+  display:block;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:16px;
+  cursor:pointer;
+}
+.censor-card input{position:absolute; top:14px; right:14px}
+.censor-card .censor-name{display:block; font-weight:600; margin-bottom:4px}
+.censor-card .censor-desc{display:block; color:var(--muted); font-size:13px; line-height:1.4}
+.censor-card:has(input:checked){border-color:var(--amber); background:var(--surface-2)}
+
+/* ===================== MISC ===================== */
+.stub-box{
+  background:var(--surface);
+  border:1px dashed var(--line);
+  border-radius:9px;
+  padding:24px;
+  color:var(--muted);
+  font-size:14px;
+}
+.conn-row{display:flex; gap:10px}
+.conn-row .field{margin-bottom:0}
+
+@media (max-width: 760px){
+  .app{flex-direction:column}
+  .rail{width:100%; flex-direction:row; flex-wrap:wrap; align-items:center}
+  .rail-nav{flex-direction:row; flex-wrap:wrap}
+  .rail-status{display:none}
+  .panel{padding:20px}
+  .censor-grid{grid-template-columns:1fr}
+}
