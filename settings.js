@@ -15,7 +15,8 @@ const CENSOR_BLOCKS = {
     blocked: "bv_blocked_words",
     ngrok: "bv_ngrok_url",
     ngrokUser: "bv_ngrok_user",
-    ngrokPass: "bv_ngrok_pass"
+    ngrokPass: "bv_ngrok_pass",
+    model: "bv_model_id"
   };
 
   function get(key, fallback) {
@@ -45,7 +46,7 @@ const CENSOR_BLOCKS = {
   };
 
   window.BV.getNgrokUrl = function () {
-    return get(LS.ngrok, "");
+    return get(LS.ngrok, "").replace(/\/+$/, "");
   };
 
   window.BV.getNgrokAuth = function () {
@@ -61,6 +62,35 @@ const CENSOR_BLOCKS = {
       return { "Authorization": `Basic ${credentials}` };
     }
     return {};
+  };
+
+  // Ask the server which models are actually loaded, and remember the first one.
+  // LM Studio validates the `model` field on /v1/chat/completions, so a hardcoded
+  // name like "local-model" gets rejected — this resolves the real id instead.
+  window.BV.resolveModelId = async function () {
+    const cached = get(LS.model, "");
+    if (cached) return cached;
+
+    const url = window.BV.getNgrokUrl();
+    if (!url) return "local-model";
+
+    try {
+      const res = await fetch(url + "/v1/models", {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+          ...window.BV.buildAuthHeader()
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const id = data?.data?.[0]?.id;
+        if (id) {
+          set(LS.model, id);
+          return id;
+        }
+      }
+    } catch (_) { /* fall through */ }
+    return "local-model";
   };
 
   window.BV.buildFullSystemPrompt = function (relevantCitations) {
@@ -218,6 +248,7 @@ const CENSOR_BLOCKS = {
         e.preventDefault();
         const url = ngrokInput.value.trim().replace(/\/+$/, "");
         set(LS.ngrok, url);
+        set(LS.model, ""); // URL changed — cached model id may be stale
         ngrokMsg.textContent = "✓ URL Saved";
         updateStatusDot(false);
         setTimeout(() => (ngrokMsg.textContent = ""), 2000);
@@ -256,14 +287,27 @@ const CENSOR_BLOCKS = {
           });
 
           if (res.ok) {
-            ngrokMsg.textContent = "✓ Connected successfully";
+            const data = await res.json().catch(() => null);
+            const models = (data?.data || []).map((m) => m.id);
+            if (models.length) {
+              set(LS.model, models[0]);
+              ngrokMsg.textContent = `✓ Connected — model: ${models[0]}`;
+            } else {
+              ngrokMsg.textContent = "✓ Connected, but no model is loaded in LM Studio — load a model first.";
+            }
             updateStatusDot(true);
+          } else if (res.status === 401) {
+            ngrokMsg.textContent = "❌ 401 Unauthorized — set your auth credentials above.";
+            updateStatusDot(false);
+          } else if (res.status === 404) {
+            ngrokMsg.textContent = "❌ 404 — tunnel is up but the LM Studio server isn't behind it. Check the port (default 1234).";
+            updateStatusDot(false);
           } else {
             ngrokMsg.textContent = `❌ Server error: ${res.status}`;
             updateStatusDot(false);
           }
         } catch (err) {
-          ngrokMsg.textContent = "❌ Could not reach server. Check URL and CORS settings.";
+          ngrokMsg.textContent = "❌ Could not reach server. Check the URL, that the tunnel is running, and that CORS is enabled in LM Studio.";
           updateStatusDot(false);
         }
       });

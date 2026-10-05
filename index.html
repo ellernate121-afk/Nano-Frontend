@@ -120,17 +120,24 @@
       <section id="tab-connection" class="tab">
         <header class="tab-head">
           <h2>Server Connection</h2>
-          <p>Connect to your LM Studio instance via ngrok. The URL rotates every ngrok restart.</p>
+          <p>Connect to your LM Studio instance via its ngrok tunnel.</p>
         </header>
 
         <div class="conn-section">
-          <label class="field-label">ngrok URL</label>
+          <p style="color: var(--muted); font-size: 13px; margin: 0 0 12px;">
+            Tip: claim your free static domain in the
+            <a href="https://dashboard.ngrok.com/domains" target="_blank" rel="noopener">ngrok dashboard</a>
+            and start the tunnel with <code>ngrok http 1234 --url=YOUR-STATIC-DOMAIN</code>.
+            The URL then never changes, no matter how many times you restart.
+          </p>
+
+          <label class="field-label">Server URL</label>
           <div class="conn-row">
-            <input id="ngrok-url" class="field" placeholder="https://xxxxxxx.ngrok-free.app">
+            <input id="ngrok-url" class="field" placeholder="https://your-domain.ngrok-free.app">
             <button id="ngrok-save" type="button" class="btn-primary">Save</button>
           </div>
 
-          <label class="field-label">ngrok Authentication (Optional)</label>
+          <label class="field-label">Authentication (Optional)</label>
           <p style="color: var(--muted); font-size: 12px; margin: 0 0 12px;">Leave blank if no auth is required.</p>
           <div class="conn-row">
             <input id="ngrok-user" class="field" placeholder="Username">
