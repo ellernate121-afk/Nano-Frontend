@@ -102,7 +102,8 @@ const CENSOR_BLOCKS = {
     const promptSaved = document.getElementById("prompt-saved");
 
     promptText.value = window.BV.getSystemPrompt();
-    promptSave.addEventListener("click", () => {
+    promptSave.addEventListener("click", (e) => {
+      e.preventDefault();
       set(LS.prompt, promptText.value.trim());
       promptSaved.textContent = "✓ Saved";
       setTimeout(() => (promptSaved.textContent = ""), 2000);
@@ -207,59 +208,66 @@ const CENSOR_BLOCKS = {
     const ngrokTest = document.getElementById("ngrok-test");
     const ngrokMsg = document.getElementById("ngrok-msg");
 
-    ngrokInput.value = window.BV.getNgrokUrl();
-    const auth = window.BV.getNgrokAuth();
-    ngrokUser.value = auth.user;
-    ngrokPass.value = auth.pass;
+    if (ngrokInput && ngrokSave && ngrokTest && ngrokMsg) {
+      ngrokInput.value = window.BV.getNgrokUrl();
+      const auth = window.BV.getNgrokAuth();
+      if (ngrokUser) ngrokUser.value = auth.user;
+      if (ngrokPass) ngrokPass.value = auth.pass;
 
-    ngrokSave.addEventListener("click", () => {
-      const url = ngrokInput.value.trim().replace(/\/+$/, "");
-      set(LS.ngrok, url);
-      ngrokMsg.textContent = "✓ URL Saved";
-      updateStatusDot(false);
-      setTimeout(() => (ngrokMsg.textContent = ""), 2000);
-    });
+      ngrokSave.addEventListener("click", (e) => {
+        e.preventDefault();
+        const url = ngrokInput.value.trim().replace(/\/+$/, "");
+        set(LS.ngrok, url);
+        ngrokMsg.textContent = "✓ URL Saved";
+        updateStatusDot(false);
+        setTimeout(() => (ngrokMsg.textContent = ""), 2000);
+      });
 
-    ngrokAuthSave.addEventListener("click", () => {
-      const user = ngrokUser.value.trim();
-      const pass = ngrokPass.value.trim();
-      set(LS.ngrokUser, user);
-      set(LS.ngrokPass, pass);
-      ngrokMsg.textContent = user ? "✓ Auth Saved" : "✓ Auth Cleared";
-      updateStatusDot(false);
-      setTimeout(() => (ngrokMsg.textContent = ""), 2000);
-    });
-
-    ngrokTest.addEventListener("click", async () => {
-      ngrokMsg.textContent = "🔄 Testing…";
-      const url = window.BV.getNgrokUrl();
-      if (!url) {
-        ngrokMsg.textContent = "❌ No URL saved yet.";
-        return;
+      if (ngrokAuthSave) {
+        ngrokAuthSave.addEventListener("click", (e) => {
+          e.preventDefault();
+          const user = ngrokUser.value.trim();
+          const pass = ngrokPass.value.trim();
+          set(LS.ngrokUser, user);
+          set(LS.ngrokPass, pass);
+          ngrokMsg.textContent = user ? "✓ Auth Saved" : "✓ Auth Cleared";
+          updateStatusDot(false);
+          setTimeout(() => (ngrokMsg.textContent = ""), 2000);
+        });
       }
 
-      try {
-        const headers = {
-          "ngrok-skip-browser-warning": "true",
-          ...window.BV.buildAuthHeader()
-        };
+      ngrokTest.addEventListener("click", async (e) => {
+        e.preventDefault();
+        ngrokMsg.textContent = "🔄 Testing…";
+        const url = window.BV.getNgrokUrl();
+        if (!url) {
+          ngrokMsg.textContent = "❌ No URL saved yet.";
+          return;
+        }
 
-        const res = await fetch(url + "/v1/models", {
-          headers: headers
-        });
+        try {
+          const headers = {
+            "ngrok-skip-browser-warning": "true",
+            ...window.BV.buildAuthHeader()
+          };
 
-        if (res.ok) {
-          ngrokMsg.textContent = "✓ Connected successfully";
-          updateStatusDot(true);
-        } else {
-          ngrokMsg.textContent = `❌ Server error: ${res.status}`;
+          const res = await fetch(url + "/v1/models", {
+            headers: headers
+          });
+
+          if (res.ok) {
+            ngrokMsg.textContent = "✓ Connected successfully";
+            updateStatusDot(true);
+          } else {
+            ngrokMsg.textContent = `❌ Server error: ${res.status}`;
+            updateStatusDot(false);
+          }
+        } catch (err) {
+          ngrokMsg.textContent = "❌ Could not reach server. Check URL and CORS settings.";
           updateStatusDot(false);
         }
-      } catch (err) {
-        ngrokMsg.textContent = "❌ Could not reach server. Check URL and CORS settings.";
-        updateStatusDot(false);
-      }
-    });
+      });
+    }
   }
 
   function updateStatusDot(online) {
