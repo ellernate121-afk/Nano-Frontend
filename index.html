@@ -129,6 +129,15 @@
             <input id="ngrok-url" class="field" placeholder="https://xxxxxxx.ngrok-free.app">
             <button id="ngrok-save" class="btn-primary">Save</button>
           </div>
+
+          <label class="field-label">ngrok Authentication (Optional)</label>
+          <p style="color: var(--muted); font-size: 12px; margin: 0 0 12px;">Leave blank if no auth is required.</p>
+          <div class="conn-row">
+            <input id="ngrok-user" class="field" placeholder="Username">
+            <input id="ngrok-pass" class="field" placeholder="Password" type="password">
+            <button id="ngrok-auth-save" class="btn-primary">Save Auth</button>
+          </div>
+
           <button id="ngrok-test" class="btn-ghost">Test Connection</button>
           <p id="ngrok-msg" class="save-note"></p>
         </div>
