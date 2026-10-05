@@ -50,7 +50,7 @@
         </header>
         <textarea id="prompt-text" class="big-text" placeholder="You are a helpful AI assistant…" rows="10"></textarea>
         <div class="row-actions">
-          <button id="prompt-save" class="btn-primary">Save Prompt</button>
+          <button id="prompt-save" type="button" class="btn-primary">Save Prompt</button>
           <span id="prompt-saved" class="save-note"></span>
         </div>
       </section>
@@ -127,7 +127,7 @@
           <label class="field-label">ngrok URL</label>
           <div class="conn-row">
             <input id="ngrok-url" class="field" placeholder="https://xxxxxxx.ngrok-free.app">
-            <button id="ngrok-save" class="btn-primary">Save</button>
+            <button id="ngrok-save" type="button" class="btn-primary">Save</button>
           </div>
 
           <label class="field-label">ngrok Authentication (Optional)</label>
@@ -135,10 +135,10 @@
           <div class="conn-row">
             <input id="ngrok-user" class="field" placeholder="Username">
             <input id="ngrok-pass" class="field" placeholder="Password" type="password">
-            <button id="ngrok-auth-save" class="btn-primary">Save Auth</button>
+            <button id="ngrok-auth-save" type="button" class="btn-primary">Save Auth</button>
           </div>
 
-          <button id="ngrok-test" class="btn-ghost">Test Connection</button>
+          <button id="ngrok-test" type="button" class="btn-ghost">Test Connection</button>
           <p id="ngrok-msg" class="save-note"></p>
         </div>
       </section>
