@@ -41,7 +41,7 @@
 
       const url = window.BV.getNgrokUrl();
       if (!url) {
-        addMessage("system-note", "❌ No ngrok URL saved — configure in Connection tab first.");
+        addMessage("system-note", "❌ No server URL saved — configure the Connection tab first.");
         return;
       }
 
@@ -49,6 +49,9 @@
       const thinking = addMessage("assistant", "⏳ Thinking…");
 
       try {
+        // Resolve the real model id from LM Studio instead of hardcoding one.
+        const modelId = await window.BV.resolveModelId();
+
         const citations = window.BV.matchCitations(text);
         const systemPrompt = window.BV.buildFullSystemPrompt(citations);
 
@@ -66,7 +69,7 @@
           method: "POST",
           headers: headers,
           body: JSON.stringify({
-            model: "local-model",
+            model: modelId,
             messages: [...messages, { role: "user", content: text }],
             temperature: 0.7,
             stream: false,
@@ -75,7 +78,13 @@
         });
 
         if (!res.ok) {
-          thinking.textContent = `❌ Error ${res.status}`;
+          // Surface the actual server error so failures are diagnosable.
+          let detail = "";
+          try {
+            const errBody = await res.json();
+            detail = errBody?.error?.message ? ` — ${errBody.error.message}` : "";
+          } catch (_) { /* not JSON, ignore */ }
+          thinking.textContent = `❌ Error ${res.status}${detail}`;
           window.BV.updateStatusDot(false);
           isWaiting = false;
           return;
@@ -91,9 +100,10 @@
 
         thinking.textContent = reply;
         history.push({ role: "assistant", content: reply });
+        saveHistory(); // persist immediately so a reload never loses the reply
         window.BV.updateStatusDot(true);
       } catch (err) {
-        thinking.textContent = "❌ Server unreachable. Check ngrok is running and URL is correct.";
+        thinking.textContent = "❌ Server unreachable. Check that the tunnel is running and the URL is correct.";
         window.BV.updateStatusDot(false);
       }
 
@@ -112,6 +122,12 @@
     }
   }
 
+  function saveHistory() {
+    // Cap stored history so localStorage can't grow unbounded.
+    if (history.length > 100) history = history.slice(-100);
+    localStorage.setItem("bv_chat_history", JSON.stringify(history));
+  }
+
   function addMessage(role, text) {
     const log = document.getElementById("chat-log");
     const el = document.createElement("div");
@@ -119,11 +135,12 @@
     el.textContent = text;
     log.appendChild(el);
     log.scrollTop = log.scrollHeight;
-    localStorage.setItem("bv_chat_history", JSON.stringify(history));
+    saveHistory();
     return el;
   }
 
   window.BV = window.BV || {};
+
   window.BV.clearChat = function () {
     history = [];
     const log = document.getElementById("chat-log");
