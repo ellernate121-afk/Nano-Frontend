@@ -13,7 +13,9 @@ const CENSOR_BLOCKS = {
     censor: "bv_censor_level",
     citations: "bv_citations",
     blocked: "bv_blocked_words",
-    ngrok: "bv_ngrok_url"
+    ngrok: "bv_ngrok_url",
+    ngrokUser: "bv_ngrok_user",
+    ngrokPass: "bv_ngrok_pass"
   };
 
   function get(key, fallback) {
@@ -44,6 +46,21 @@ const CENSOR_BLOCKS = {
 
   window.BV.getNgrokUrl = function () {
     return get(LS.ngrok, "");
+  };
+
+  window.BV.getNgrokAuth = function () {
+    const user = get(LS.ngrokUser, "");
+    const pass = get(LS.ngrokPass, "");
+    return { user, pass };
+  };
+
+  window.BV.buildAuthHeader = function () {
+    const { user, pass } = window.BV.getNgrokAuth();
+    if (user && pass) {
+      const credentials = btoa(`${user}:${pass}`);
+      return { "Authorization": `Basic ${credentials}` };
+    }
+    return {};
   };
 
   window.BV.buildFullSystemPrompt = function (relevantCitations) {
@@ -184,15 +201,31 @@ const CENSOR_BLOCKS = {
 
     const ngrokInput = document.getElementById("ngrok-url");
     const ngrokSave = document.getElementById("ngrok-save");
+    const ngrokUser = document.getElementById("ngrok-user");
+    const ngrokPass = document.getElementById("ngrok-pass");
+    const ngrokAuthSave = document.getElementById("ngrok-auth-save");
     const ngrokTest = document.getElementById("ngrok-test");
     const ngrokMsg = document.getElementById("ngrok-msg");
 
     ngrokInput.value = window.BV.getNgrokUrl();
+    const auth = window.BV.getNgrokAuth();
+    ngrokUser.value = auth.user;
+    ngrokPass.value = auth.pass;
 
     ngrokSave.addEventListener("click", () => {
       const url = ngrokInput.value.trim().replace(/\/+$/, "");
       set(LS.ngrok, url);
-      ngrokMsg.textContent = "✓ Saved";
+      ngrokMsg.textContent = "✓ URL Saved";
+      updateStatusDot(false);
+      setTimeout(() => (ngrokMsg.textContent = ""), 2000);
+    });
+
+    ngrokAuthSave.addEventListener("click", () => {
+      const user = ngrokUser.value.trim();
+      const pass = ngrokPass.value.trim();
+      set(LS.ngrokUser, user);
+      set(LS.ngrokPass, pass);
+      ngrokMsg.textContent = user ? "✓ Auth Saved" : "✓ Auth Cleared";
       updateStatusDot(false);
       setTimeout(() => (ngrokMsg.textContent = ""), 2000);
     });
@@ -206,8 +239,13 @@ const CENSOR_BLOCKS = {
       }
 
       try {
+        const headers = {
+          "ngrok-skip-browser-warning": "true",
+          ...window.BV.buildAuthHeader()
+        };
+
         const res = await fetch(url + "/v1/models", {
-          headers: { "ngrok-skip-browser-warning": "true" }
+          headers: headers
         });
 
         if (res.ok) {
