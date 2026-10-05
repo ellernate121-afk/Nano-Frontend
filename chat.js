@@ -56,12 +56,15 @@
         if (systemPrompt) messages.push({ role: "system", content: systemPrompt });
         messages.push(...history.slice(0, -1));
 
+        const headers = {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+          ...window.BV.buildAuthHeader()
+        };
+
         const res = await fetch(url + "/v1/chat/completions", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true"
-          },
+          headers: headers,
           body: JSON.stringify({
             model: "local-model",
             messages: [...messages, { role: "user", content: text }],
